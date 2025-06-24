@@ -1,0 +1,152 @@
+# Poker Bankroll Tracker – MVP Product Requirements Document (PRD)
+
+**Version 0.2 – 12 Jun 2025**
+
+---
+
+## 1 . Purpose
+
+Deliver a minimum viable desktop web‑application that enables a single poker player to record live‑cash sessions and instantly visualise performance **offline**, with no cloud services.
+
+## 2 . Goals & Success Metrics
+
+| Goal          | Metric                                            |
+| ------------- | ------------------------------------------------- |
+| Fast entry    | Record a session in ≤30 seconds                   |
+| Clear insight | Cumulative profit chart & key stats on one screen |
+| Reliability   | Store ≥100 sessions without data loss             |
+| Performance   | App launches <2 s on mid‑range MacBook            |
+
+> **Success**: A first‑time user can install, record the first session, and view stats within 5 minutes.
+
+## 3 . Target Users
+
+Recreational or semi‑professional poker players who value privacy and want a lightweight, offline bankroll tracker on macOS.
+
+## 4 . Scope
+
+### In‑Scope (MVP)
+
+* **Session Entry** with fields: *Date, Location, Stakes, Big‑blind Size (bb, numeric), Buy‑in, Cash‑out, Hours*.
+
+  * *Stakes*: free‑form text (e.g. “\$1/\$3/\$6”) to capture table structure.
+  * *Big‑blind Size*: numeric (e.g. `2`) for statistical calculations.
+* **Auto‑calculations**: net profit, bb, bb/hour, ROI.
+* **Statistics Page** showing:
+
+  * Cumulative profit line chart (Recharts).
+  * Summary cards: total sessions, hours, profit, avg. profit/session, bb/h.
+* **Local Persistence**: SQLite file in user‐config directory.
+* **Desktop Delivery (macOS‑only)**: FastAPI backend + React front‑end packaged with **Tauri** for a native `.app` installer.
+
+### Out‑of‑Scope (Deferred)
+
+* Authentication, multi‑user.
+* Cloud sync or mobile apps.
+* Tournament, hand histories, social features.
+
+## 5 . User Stories
+
+| ID   | Story                                                                            | Priority |
+| ---- | -------------------------------------------------------------------------------- | -------- |
+| US‑1 | *As a player, I want to quickly log a session so my bankroll stays current.*     | P0       |
+| US‑2 | *As a player, I want a clear graph and summary so I can see performance trends.* | P0       |
+| US‑3 | *As a player, I want to correct mistakes in entries.* (delete & re‑add)          | P1       |
+
+## 6 . Functional Requirements
+
+| ID   | Requirement                                    | Priority |
+| ---- | ---------------------------------------------- | -------- |
+| FR‑1 | Create session with required fields.           | P0       |
+| FR‑2 | Compute net profit (cash‑out − buy‑in).        | P0       |
+| FR‑3 | Compute bb/h = (net profit ÷ bb size) ÷ hours. | P0       |
+| FR‑4 | Persist data locally (SQLite).                 | P0       |
+| FR‑5 | List sessions in table with delete action.     | P1       |
+| FR‑6 | Render cumulative profit chart.                | P0       |
+
+## 7 . Non‑Functional Requirements
+
+| Category      | Requirement                                  |
+| ------------- | -------------------------------------------- |
+| Performance   | API response <100 ms for DB ≤10 k rows       |
+| Security      | All data remains on device, no network calls |
+| Compatibility | **macOS 14+** (Apple Silicon & Intel)        |
+| Accessibility | Keyboard navigable, colour‑blind friendly    |
+| Quality       | ≥80 % backend unit‑test coverage             |
+
+## 8 . Technical Architecture
+
+```
+[React (Vite) UI] ←HTTP→ [FastAPI REST] ←SQLModel→ SQLite DB
+                          │
+                          └── packaged via **Tauri** → native macOS .app
+```
+
+* **Backend**: FastAPI, Pydantic, SQLModel, Uvicorn.
+* **Frontend**: React + TypeScript, Zustand state, Axios, Recharts.
+* **Packaging**: Poetry for deps, Tauri for installer; Homebrew cask optional.
+
+## 9 . Data Model
+
+`Session`
+
+| Field     | Type     | Description            |
+| --------- | -------- | ---------------------- |
+| id        | int (PK) | Auto‑increment         |
+| date      | date     | Session date           |
+| location  | str(50)  | Venue                  |
+| stakes    | str(20)  | Free‑form stakes text  |
+| bb\_size  | decimal  | Numeric big‑blind size |
+| buy\_in   | decimal  | Amount bought in       |
+| cash\_out | decimal  | Amount cashed out      |
+| hours     | decimal  | Session length         |
+
+## 10 . API Contract
+
+| Method | Path           | Description                  | Body          | Response     |
+| ------ | -------------- | ---------------------------- | ------------- | ------------ |
+| POST   | /sessions      | Add session                  | SessionCreate | Session      |
+| GET    | /sessions      | List sessions                | –             | \[Session]   |
+| DELETE | /sessions/{id} | Delete session               | –             | 204          |
+| GET    | /stats         | Aggregate stats & chart data | –             | StatsPayload |
+
+## 11 . Acceptance Criteria
+
+* User adds a session and data persists after restart.
+* Stats calculations accurate to ±0.01.
+* Profit graph updates immediately after new entry.
+* All P0 requirements met; tests pass.
+
+## 12 . Release Plan
+
+| Sprint                 | Duration | Deliverables               |
+| ---------------------- | -------- | -------------------------- |
+| 0 – Setup              | 1 wk     | Repo, CI, project scaffold |
+| 1 – CRUD               | 2 wks    | FR‑1 → FR‑4                |
+| 2 – Stats & Chart      | 1 wk     | FR‑5, FR‑6                 |
+| 3 – Polish & Packaging | 1 wk     | macOS .app installer, docs |
+
+## 13 . Future Features
+
+* User authentication & multi‑user.
+* Cloud sync.
+* Tournament & mixed‑game tracking.
+* Tagging, filters, advanced analytics (EV, SD).
+
+## 14 . Risks & Mitigations
+
+| Risk                | Impact | Mitigation                               |
+| ------------------- | ------ | ---------------------------------------- |
+| Data loss           | High   | Auto‑backup JSON export                  |
+| macOS‑specific bugs | Med    | Test across Intel & Apple‑Silicon via CI |
+
+## 15 . License
+
+Released under the **MIT License**.
+
+## 16 . Glossary
+
+* **bb/h** – Big blinds per hour.
+* **ROI** – Return on investment.
+
+---
