@@ -45,20 +45,6 @@ const SessionList: React.FC<SessionListProps> = ({ sessions, onDelete, onUpdate,
     }
   };
 
-  const handleNotesChange = useCallback((newNotes: string) => {
-    setEditedNotes(newNotes);
-    
-    // Clear existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    
-    // Set new timeout for auto-save
-    saveTimeoutRef.current = setTimeout(() => {
-      saveNotes(newNotes);
-    }, 1000); // Auto-save after 1 second of inactivity
-  }, []);
-
   const saveNotes = useCallback(async (notesToSave: string) => {
     if (!selectedSession || notesToSave === selectedSession.notes) {
       return; // No changes to save
@@ -77,6 +63,20 @@ const SessionList: React.FC<SessionListProps> = ({ sessions, onDelete, onUpdate,
       setIsSaving(false);
     }
   }, [selectedSession, onUpdate]);
+
+  const handleNotesChange = useCallback((newNotes: string) => {
+    setEditedNotes(newNotes);
+    
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    // Set new timeout for auto-save
+    saveTimeoutRef.current = setTimeout(() => {
+      saveNotes(newNotes);
+    }, 1000); // Auto-save after 1 second of inactivity
+  }, [saveNotes]);
 
   const toggleEditMode = () => {
     setIsEditing(!isEditing);

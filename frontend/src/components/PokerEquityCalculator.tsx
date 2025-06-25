@@ -142,7 +142,6 @@ const getPrecomputedEquity = (hand1: Card[], hand2: Card[]): { hand1: HandEquity
   const h1Ranks = hand1.map(c => getRankValue(c.rank)).sort((a, b) => b - a);
   const h2Ranks = hand2.map(c => getRankValue(c.rank)).sort((a, b) => b - a);
   const h1Suited = hand1[0].suit === hand1[1].suit;
-  const h2Suited = hand2[0].suit === hand2[1].suit;
   
   // AK suited vs low pocket pair
   if (h1Ranks[0] === 14 && h1Ranks[1] === 13 && h1Suited && 
@@ -208,7 +207,6 @@ const calculateEquity = (hand1: Card[], hand2: Card[]): { hand1: HandEquity; han
 };
 
 const PokerEquityCalculator: React.FC = () => {
-  const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [player1Hand, setPlayer1Hand] = useState<Card[]>([]);
   const [player2Hand, setPlayer2Hand] = useState<Card[]>([]);
   const [results, setResults] = useState<{ hand1: HandEquity; hand2: HandEquity } | null>(null);

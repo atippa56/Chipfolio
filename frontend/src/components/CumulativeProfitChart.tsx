@@ -29,15 +29,6 @@ const CumulativeProfitChart: React.FC<CumulativeProfitChartProps> = ({ sessions 
     return acc;
   }, [] as any[]);
 
-  const formatTooltip = (value: any, name: string) => {
-    if (name === 'cumulativeProfit') {
-      return [`$${value.toFixed(2)}`, 'Cumulative Profit'];
-    }
-    return [value, name];
-  };
-
-  const formatLabel = (label: string) => `Session ${label}`;
-
   const customTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
