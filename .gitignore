@@ -26,4 +26,14 @@ node_modules/
 
 # Task files
 tasks.json
-tasks/ 
+tasks/
+
+# React build artifacts (copied to root for Vercel)
+index.html
+manifest.json
+asset-manifest.json
+static/
+robots.txt
+favicon.ico
+logo192.png
+logo512.png 
